@@ -1,0 +1,137 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sistema-ong-controle-datas"
+version = "1.0.0"
+description = "Sistema completo de controle de datas, produtos e movimentações para ONGs"
+authors = [
+    {name = "Ivanildo Nogueira Lima", email = "ivanildo@exemplo.com"}
+]
+license = {text = "MIT"}
+readme = "README.md"
+requires-python = ">=3.11"
+keywords = ["flask", "ong", "controle", "estoque", "validade"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Web Environment",
+    "Framework :: Flask",
+    "Intended Audience :: End Users/Desktop",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Office/Business",
+    "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
+]
+
+dependencies = [
+    "Flask>=2.3.3",
+    "Flask-SQLAlchemy>=3.0.5",
+    "Flask-Migrate>=4.0.5",
+    "Flask-WTF>=1.1.1",
+    "Flask-Login>=0.6.3",
+    "Flask-RESTful>=0.3.10",
+    "Flask-Cors>=4.0.0",
+    "python-dotenv>=1.0.0",
+    "reportlab>=4.0.4",
+    "pandas>=2.1.1",
+    "openpyxl>=3.1.2",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.2",
+    "pytest-flask>=1.2.0",
+    "coverage>=7.3.2",
+    "black>=23.0.0",
+    "flake8>=6.0.0",
+    "isort>=5.12.0",
+]
+prod = [
+    "gunicorn>=21.2.0",
+    "uWSGI>=2.0.22",
+]
+
+[project.urls]
+Homepage = "https://github.com/ivanildo/sistema-ong"
+Repository = "https://github.com/ivanildo/sistema-ong.git"
+Issues = "https://github.com/ivanildo/sistema-ong/issues"
+
+[project.scripts]
+sistema-ong = "run:main"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "--strict-markers",
+    "--strict-config",
+    "--verbose",
+    "--cov=app",
+    "--cov-report=term-missing",
+    "--cov-report=html",
+]
+
+[tool.coverage.run]
+source = ["app"]
+omit = [
+    "*/tests/*",
+    "*/venv/*",
+    "*/__pycache__/*",
+    "app/__init__.py",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+]
+
+[tool.black]
+line-length = 88
+target-version = ['py311']
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | _build
+  | buck-out
+  | build
+  | dist
+  | migrations
+)/
+'''
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+line_length = 88
+known_first_party = ["app"]
+skip = ["migrations"]
+
+[tool.flake8]
+max-line-length = 88
+exclude = [
+    ".git",
+    "__pycache__",
+    "migrations",
+    "venv",
+    ".venv",
+]
+ignore = [
+    "E203",  # whitespace before ':'
+    "E501",  # line too long
+    "W503",  # line break before binary operator
+]

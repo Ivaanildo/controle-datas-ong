@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📦 Central ONG - Controle de Validades</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=2025072903">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <meta name="theme-color" content="#06b6d4">
+</head>
+<body data-theme="light">
+    <!-- Background Animado -->
+    <div class="animated-bg"></div>
+    
+    <div class="app-layout" id="appLayout">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar" aria-label="Menu principal">
+            <div class="sidebar-header">
+                <div class="logo" tabindex="0" aria-label="Central ONG - Página inicial">
+                    <span class="logo-icon">📦</span>
+                    <span class="logo-text">Central ONG</span>
+                </div>
+                <button class="sidebar-toggle" onclick="toggleSidebar()" aria-label="Abrir/fechar menu lateral">
+                    <span class="hamburger"></span>
+                </button>
+            </div>
+            <nav class="sidebar-nav" aria-label="Menu principal">
+                <div class="nav-section">
+                    <a href="#" class="nav-item active" data-view="dashboard-view">
+                        <span class="nav-icon">📊</span>
+                        <span class="nav-text">Dashboard</span>
+                    </a>
+                    <a href="#" class="nav-item" data-view="products-view">
+                        <span class="nav-icon">📦</span>
+                        <span class="nav-text">Produtos</span>
+                    </a>
+                    <a href="#" class="nav-item" data-view="categories-view">
+                        <span class="nav-icon">🏷️</span>
+                        <span class="nav-text">Categorias</span>
+                    </a>
+                    <a href="#" class="nav-item" data-view="movements-view">
+                        <span class="nav-icon">📋</span>
+                        <span class="nav-text">Movimentações</span>
+                    </a>
+                    <a href="#" class="nav-item" data-view="reports-view">
+                        <span class="nav-icon">📊</span>
+                        <span class="nav-text">Relatórios</span>
+                    </a>
+                    <a href="#" class="nav-item" data-view="validity-management-view">
+                        <span class="nav-icon">📅</span>
+                        <span class="nav-text">Controle de Validades</span>
+                    </a>
+                </div>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <span class="user-icon">👤</span>
+                    <span class="user-name">Administrador</span>
+                </div>
+                <a href="#" class="logout-button" aria-label="Sair do sistema">
+                    <span>🚪</span> Sair
+                </a>
+            </div>
+        </aside>
+
+        <!-- Conteúdo Principal -->
+        <main class="main-content" id="mainContent" tabindex="-1">
+            <header class="main-header">
+                <div class="header-left" style="width:100%; display:flex; justify-content:center; align-items:center;">
+                    <button class="sidebar-toggle-mobile" onclick="toggleSidebar()">
+                        <span class="hamburger"></span>
+                    </button>
+                    <h1 class="page-title" id="pageTitle" style="margin:0 auto; text-align:center; flex:1;">Dashboard</h1>
+                </div>
+            </header>
+
+            <div class="content-area">
+                <!-- Dashboard View -->
+                <section id="dashboard-view" class="view active">
+                    <div class="dashboard-grid">
+                        <!-- Cards de Status -->
+                            <div class="status-card urgent">
+                                <div class="card-icon">🔴</div>
+                                <div class="card-content">
+                                    <h3>Vencidos</h3>
+                                    <p class="card-number" id="vencidos-count">0</p>
+                                </div>
+                            </div>
+                            <div class="status-card warning">
+                                <div class="card-icon">🟡</div>
+                                <div class="card-content">
+                                    <h3>Vencem em 7 dias</h3>
+                                    <p class="card-number" id="sete-dias-count">0</p>
+                                </div>
+                            </div>
+                            <div class="status-card good">
+                                <div class="card-icon">🟢</div>
+                                <div class="card-content">
+                                    <h3>Vencem em 30 dias</h3>
+                                    <p class="card-number" id="trinta-dias-count">0</p>
+                                </div>
+                            </div>
+
+                        <!-- Gráficos lado a lado -->
+                        <div class="charts-grid">
+                            <!-- Gráfico de Categorias -->
+                            <div class="chart-container">
+                                <h3>Distribuição por Categoria</h3>
+                                <canvas id="categoryChart"></canvas>
+                            </div>
+
+                            <!-- Gráfico de Status de Produtos -->
+                            <div class="chart-container">
+                                <h3>Status dos Produtos</h3>
+                                <canvas id="productStatusChart"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Produtos com Vencimento Próximo -->
+                        <div class="upcoming-expiry">
+                            <h3>Produtos com Vencimento Próximo</h3>
+                            <div class="table-container">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Produto</th>
+                                            <th>Categoria</th>
+                                            <th>Validade</th>
+                                            <th>Dias Restantes</th>
+                                            <th>Quantidade</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="upcoming-expiry-table">
+                                        <!-- Dados carregados via JavaScript -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- Products View -->
+                <section id="products-view" class="view">
+                    <div class="view-header">
+                        <h2>Controle de Produtos</h2>
+                        <div class="view-actions">
+                            <button class="btn btn-primary" onclick="openModal('product-modal')">
+                                ➕ Novo Produto
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Filtros -->
+                    <div class="filters-container">
+                        <div class="filter-group">
+                            <label for="filtroCategoria">Categoria:</label>
+                            <select id="filtroCategoria" class="filter-select">
+                                <option value="">Todas as categorias</option>
+                                <!-- Opções carregadas via JavaScript -->
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="filtroQuantidade">Quantidade:</label>
+                            <select id="filtroQuantidade" class="filter-select">
+                                <option value="">Todas as quantidades</option>
+                                <option value="baixa">Baixa (< 10)</option>
+                                <option value="media">Média (10-50)</option>
+                                <option value="alta">Alta (> 50)</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="searchInput">Buscar:</label>
+                            <input type="text" id="searchInput" class="filter-input" placeholder="Nome do produto...">
+                        </div>
+                        <div class="filter-group">
+                            <label for="filtroStatus">Status:</label>
+                            <select id="filtroStatus" class="filter-select">
+                                <option value="">Todos</option>
+                                <option value="vencido">Vencido</option>
+                                <option value="urgente">Vencem em 7 dias</option>
+                                <option value="ok">OK</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-secondary" onclick="limparFiltros()">Limpar Filtros</button>
+                    </div>
+
+                    <!-- Tabela de Produtos -->
+                    <div class="table-container">
+                        <table class="data-table" id="productsTable">
+                            <thead>
+                                <tr>
+                                    <th>Status</th>
+                                    <th>Nome</th>
+                                    <th>Categoria</th>
+                                    <th>Data de Validade</th>
+                                    <th>Dias Restantes</th>
+                                    <th>Quantidade</th>
+                                    <th>Valor Estimado</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="products-table-body">
+                                <!-- Dados carregados via JavaScript -->
+                            </tbody>
+                        </table>
+                        <div id="products-empty-state" class="empty-state" style="display: none;">
+                            <p>Nenhum produto cadastrado ainda.</p>
+                            <p>Comece adicionando seu primeiro produto para gerenciar validades e estoque!</p>
+                            <button class="btn btn-primary" onclick="openModal('product-modal')">
+                                ➕ Adicionar Primeiro Produto
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Controles de Paginação -->
+                    <div class="pagination-controls" id="products-pagination" style="display: none;">
+                        <button class="btn btn-secondary" id="products-prev-page">Anterior</button>
+                        <span id="products-page-info"></span>
+                        <button class="btn btn-secondary" id="products-next-page">Próxima</button>
+                    </div>
+                </section>
+                
+                <!-- Categories View -->
+                <section id="categories-view" class="view">
+                    <div class="view-header">
+                        <h2>Gerenciar Categorias</h2>
+                        <div class="view-actions">
+                            <button class="btn btn-primary" onclick="openModal('category-modal')">
+                                ➕ Nova Categoria
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Nome</th>
+                                    <th>Descrição</th>
+                                    <th>Produtos</th>
+                                    <th>Criado em</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="categories-table-body">
+                                <!-- Dados carregados via JavaScript -->
+                            </tbody>
+                        </table>
+                        <div id="categories-empty-state" class="empty-state" style="display: none;">
+                            <p>Nenhuma categoria cadastrada ainda.</p>
+                            <p>Organize seus produtos criando categorias como "Alimentos", "Higiene", "Limpeza", etc.</p>
+                            <button class="btn btn-primary" onclick="openModal('category-modal')">
+                                ➕ Criar Primeira Categoria
+                            </button>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- Movements View -->
+                <section id="movements-view" class="view">
+                    <div class="view-header">
+                        <h2>Movimentações</h2>
+                        <div class="view-actions">
+                            <button class="btn btn-primary" onclick="openModal('movement-modal')">
+                                ➕ Nova Movimentação
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Filtros de Movimentações -->
+                    <div class="filters-container">
+                        <div class="filter-group">
+                            <label for="filtroMovimentoProduto">Produto:</label>
+                            <select id="filtroMovimentoProduto" class="filter-select">
+                                <option value="">Todos os Produtos</option>
+                                <!-- Opções carregadas via JavaScript -->
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="filtroMovimentoTipo">Tipo:</label>
+                            <select id="filtroMovimentoTipo" class="filter-select">
+                                <option value="">Todos os Tipos</option>
+                                <option value="entrada">Entrada</option>
+                                <option value="saida">Saída</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="filtroMovimentoMotivo">Motivo:</label>
+                            <select id="filtroMovimentoMotivo" class="filter-select">
+                                <option value="">Todos os Motivos</option>
+                                <option value="doacao">Doação</option>
+                                <option value="distribuicao">Distribuição</option>
+                                <option value="vencimento">Vencimento</option>
+                                <option value="perda">Perda</option>
+                                <option value="ajuste">Ajuste de Estoque</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="filtroMovimentoDataInicio">Data Início:</label>
+                            <input type="date" id="filtroMovimentoDataInicio" class="filter-input">
+                        </div>
+                        <div class="filter-group">
+                            <label for="filtroMovimentoDataFim">Data Fim:</label>
+                            <input type="date" id="filtroMovimentoDataFim" class="filter-input">
+                        </div>
+                        <div class="filter-group">
+                            <label for="filtroMovimentoUsuario">Usuário:</label>
+                            <input type="text" id="filtroMovimentoUsuario" class="filter-input" placeholder="Nome do usuário...">
+                        </div>
+                        <button class="btn btn-secondary" onclick="applyMovementFilters()">Aplicar Filtros</button>
+                        <button class="btn btn-secondary" onclick="clearMovementFilters()">Limpar Filtros</button>
+                    </div>
+
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Data</th>
+                                    <th>Produto</th>
+                                    <th>Tipo</th>
+                                    <th>Quantidade</th>
+                                    <th>Motivo</th>
+                                    <th>Usuário</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="movements-table-body">
+                                <!-- Dados carregados via JavaScript -->
+                            </tbody>
+                        </table>
+                        <div id="movements-empty-state" class="empty-state" style="display: none;">
+                            <p>Nenhuma movimentação registrada ainda.</p>
+                            <p>Registre entradas e saídas de produtos para manter seu estoque atualizado.</p>
+                            <button class="btn btn-primary" onclick="openModal('movement-modal')">
+                                ➕ Registrar Primeira Movimentação
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Controles de Paginação -->
+                    <div class="pagination-controls" id="movements-pagination" style="display: none;">
+                        <button class="btn btn-secondary" id="movements-prev-page">Anterior</button>
+                        <span id="movements-page-info"></span>
+                        <button class="btn btn-secondary" id="movements-next-page">Próxima</button>
+                    </div>
+                </section>
+                
+                <!-- Reports View -->
+                <section id="reports-view" class="view">
+                    <div class="view-header">
+                        <h2>Relatórios</h2>
+                    </div>
+
+                    <div class="reports-grid">
+                        <div class="report-card creative">
+                            <div class="report-icon" style="font-size:2.5rem;">📅</div>
+                            <h3>Relatório de Validades</h3>
+                            <p class="report-desc">Baixe um relatório dos produtos próximos ao vencimento. Ideal para monitorar estoques e evitar perdas.</p>
+                            <div class="report-filters">
+                                <select id="validityReportFilter">
+                                    <option value="all">Todos os produtos</option>
+                                    <option value="vencido">Apenas vencidos</option>
+                                    <option value="urgente">Vencem em 7 dias</option>
+                                </select>
+                                <button class="btn btn-download" title="Baixar PDF" onclick="generateReport('validity', 'pdf')">⬇️ PDF</button>
+                                <button class="btn btn-download" title="Baixar Excel" onclick="generateReport('validity', 'excel')">⬇️ Excel</button>
+                            </div>
+                            <span class="report-tip">Dica: Use o filtro para visualizar apenas os itens críticos.</span>
+                        </div>
+
+                        <div class="report-card creative">
+                            <div class="report-icon" style="font-size:2.5rem;">📋</div>
+                            <h3>Relatório de Movimentações</h3>
+                            <p class="report-desc">Acompanhe o histórico de entradas e saídas de produtos. Gere relatórios para auditoria ou prestação de contas.</p>
+                            <div class="report-filters">
+                                <input type="date" id="movementDateFrom" title="Data inicial">
+                                <input type="date" id="movementDateTo" title="Data final">
+                                <select id="movementTypeFilter">
+                                    <option value="all">Todos os tipos</option>
+                                    <option value="entrada">Apenas entradas</option>
+                                    <option value="saida">Apenas saídas</option>
+                                </select>
+                                <button class="btn btn-download" title="Baixar PDF" onclick="generateReport('movements', 'pdf')">⬇️ PDF</button>
+                                <button class="btn btn-download" title="Baixar Excel" onclick="generateReport('movements', 'excel')">⬇️ Excel</button>
+                            </div>
+                            <span class="report-tip">Dica: Filtre por período para relatórios mais precisos.</span>
+                        </div>
+
+                        <div class="report-card creative">
+                            <div class="report-icon" style="font-size:2.5rem;">🏷️</div>
+                            <h3>Relatório de Categorias</h3>
+                            <p class="report-desc">Visualize a análise por categoria de produtos. Ótimo para identificar tendências e necessidades.</p>
+                            <div class="report-filters">
+                                <select id="categoryReportFilter">
+                                    <option value="all">Todas as categorias</option>
+                                    <!-- Opções carregadas via JavaScript -->
+                                </select>
+                                <button class="btn btn-download" title="Baixar PDF" onclick="generateReport('categories', 'pdf')">⬇️ PDF</button>
+                                <button class="btn btn-download" title="Baixar Excel" onclick="generateReport('categories', 'excel')">⬇️ Excel</button>
+                            </div>
+                            <span class="report-tip">Dica: Selecione uma categoria para relatório detalhado.</span>
+                        </div>
+                    </div>
+                    <div id="reports-empty-state" class="empty-state" style="display: none;">
+                        <p>Não há dados suficientes para gerar relatórios.</p>
+                        <p>Certifique-se de ter produtos, categorias e movimentações cadastradas no sistema.</p>
+                        <button class="btn btn-primary" onclick="showView('products-view')">
+                            ➕ Adicionar Produtos
+                        </button>
+                        <button class="btn btn-secondary" onclick="showView('categories-view')">
+                            ➕ Criar Categorias
+                        </button>
+                        <button class="btn btn-secondary" onclick="showView('movements-view')">
+                            ➕ Registrar Movimentações
+                        </button>
+                    </div>
+                </section>
+                
+                <!-- Validity Management View -->
+                <section id="validity-management-view" class="view">
+                    <div class="view-header">
+                        <h2>Controle de Validades</h2>
+                    </div>
+
+                    <div class="validity-filters">
+                        <div class="filter-group">
+                            <label for="validityDaysFilter">Filtrar por dias:</label>
+                            <select id="validityDaysFilter" class="filter-select">
+                                <option value="all">Todos</option>
+                                <option value="vencido">Vencidos</option>
+                                <option value="7">Vencem em 7 dias</option>
+                                <option value="30">Vencem em 30 dias</option>
+                                <option value="custom">Personalizado</option>
+                            </select>
+                        </div>
+                        <div class="filter-group" id="customDaysGroup" style="display: none;">
+                            <label for="customDays">Dias:</label>
+                            <input type="number" id="customDays" class="filter-input" placeholder="Ex: 15">
+                        </div>
+                    </div>
+
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Status</th>
+                                    <th>Nome</th>
+                                    <th>Categoria</th>
+                                    <th>Data de Validade</th>
+                                    <th>Dias Restantes</th>
+                                    <th>Quantidade</th>
+                                    <th>Valor Estimado</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="validity-table-body">
+                                <!-- Dados carregados via JavaScript -->
+                            </tbody>
+                        </table>
+                        <div id="validity-empty-state" class="empty-state" style="display: none;">
+                            <p>Nenhum produto para controle de validade.</p>
+                            <p>Adicione produtos com data de validade para começar a monitorá-los aqui.</p>
+                            <button class="btn btn-primary" onclick="openModal('product-modal')">
+                                ➕ Adicionar Produto com Validade
+                            </button>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+    
+    <!-- Product Modal -->
+    <div id="product-modal" class="modal">
+        <div class="overlay" onclick="closeModal('product-modal')"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="product-modal-title">Novo Produto</h2>
+                <button class="close-btn" onclick="closeModal('product-modal')">×</button>
+            </div>
+            <form id="product-form">
+                <div class="form-group">
+                    <label for="product-name">Nome do Produto *</label>
+                    <input type="text" id="product-name" name="nome" required placeholder="Ex: Arroz Integral 5kg">
+                </div>
+                <div class="form-group">
+                    <label for="product-description">Descrição (Opcional)</label>
+                    <textarea id="product-description" name="descricao" placeholder="Detalhes do produto..."></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="product-quantity">Quantidade Inicial *</label>
+                        <input type="number" id="product-quantity" name="quantidade_inicial" required min="0" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="product-unit">Unidade *</label>
+                        <select id="product-unit" name="unidade" required>
+                            <option value="unidade">Unidade</option>
+                            <option value="kg">Kg</option>
+                            <option value="g">Gramas</option>
+                            <option value="litro">Litro</option>
+                            <option value="ml">ML</option>
+                            <option value="pacote">Pacote</option>
+                            <option value="caixa">Caixa</option>
+                            <option value="lata">Lata</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="product-expiry">Data de Validade *</label>
+                        <input type="date" id="product-expiry" name="data_validade" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="product-value">Valor Unitário</label>
+                        <input type="number" id="product-value" name="valor_unitario" step="0.01" min="0" value="0.00">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="product-category">Categoria *</label>
+                    <select id="product-category" name="categoria_id" required>
+                        <option value="">Selecione uma categoria...</option>
+                        <!-- Opções carregadas via JavaScript -->
+                    </select>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="product-location">Localização</label>
+                        <input type="text" id="product-location" name="localizacao" placeholder="Ex: Estoque A-1">
+                    </div>
+                    <div class="form-group">
+                        <label for="product-barcode">Código de Barras</label>
+                        <input type="text" id="product-barcode" name="codigo_barras" placeholder="Código de barras (opcional)">
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('product-modal')">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">💾 Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Category Modal -->
+    <div id="category-modal" class="modal">
+        <div class="overlay" onclick="closeModal('category-modal')"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="category-modal-title">Nova Categoria</h2>
+                <button class="close-btn" onclick="closeModal('category-modal')">×</button>
+            </div>
+            <form id="category-form">
+                <div class="form-group">
+                    <label for="category-name">Nome da Categoria *</label>
+                    <input type="text" id="category-name" name="nome" required placeholder="Ex: Alimentos Perecíveis">
+                </div>
+                <div class="form-group">
+                    <label for="category-description">Descrição</label>
+                    <textarea id="category-description" name="descricao" placeholder="Descrição da categoria..."></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('category-modal')">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">💾 Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Movement Modal -->
+    <div id="movement-modal" class="modal">
+        <div class="overlay" onclick="closeModal('movement-modal')"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="movement-modal-title">Nova Movimentação</h2>
+                <button class="close-btn" onclick="closeModal('movement-modal')">×</button>
+            </div>
+            <form id="movement-form">
+                <div class="form-group">
+                    <label for="movement-product">Produto *</label>
+                    <select id="movement-product" name="produto_id" required>
+                        <option value="">Selecione um produto...</option>
+                        <!-- Opções carregadas via JavaScript -->
+                    </select>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="movement-type">Tipo *</label>
+                        <select id="movement-type" name="tipo" required>
+                            <option value="entrada">Entrada</option>
+                            <option value="saida">Saída</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="movement-quantity">Quantidade *</label>
+                        <input type="number" id="movement-quantity" name="quantidade" required min="1">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="movement-reason">Motivo *</label>
+                    <select id="movement-reason" name="motivo" required>
+                        <option value="">Selecione um motivo...</option>
+                        <option value="doacao">Doação</option>
+                        <option value="distribuicao">Distribuição</option>
+                        <option value="vencimento">Vencimento</option>
+                        <option value="perda">Perda</option>
+                        <option value="ajuste">Ajuste de Estoque</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="movement-notes">Observações</label>
+                    <textarea id="movement-notes" name="observacoes" placeholder="Observações sobre a movimentação..."></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('movement-modal')">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">💾 Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Toast Container -->
+    <div id="toast-container"></div>
+    
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{{ url_for('static', filename='js/central-ong.js') }}?v=2025072903"></script>
+</body>
+</html>
+</html>

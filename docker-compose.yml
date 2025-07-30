@@ -1,0 +1,100 @@
+version: '3.8'
+
+services:
+  # Aplicação principal
+  app:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: sistema-ong-app
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./instance:/app/instance
+      - ./logs:/app/logs
+    environment:
+      - FLASK_ENV=production
+      - SECRET_KEY=${SECRET_KEY:-dev-secret-key-change-in-production}
+      - DATABASE_URL=sqlite:///instance/app.db
+    networks:
+      - sistema-ong-network
+    restart: unless-stopped
+    depends_on:
+      - redis
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Redis for caching and sessions (optional)
+  redis:
+    image: redis:7-alpine
+    container_name: sistema-ong-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - sistema-ong-network
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Nginx reverse proxy (optional)
+  nginx:
+    image: nginx:alpine
+    container_name: sistema-ong-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    networks:
+      - sistema-ong-network
+    restart: unless-stopped
+    depends_on:
+      - app
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Backup service (optional)
+  backup:
+    image: alpine:latest
+    container_name: sistema-ong-backup
+    volumes:
+      - ./instance:/backup/instance:ro
+      - ./backups:/backup/output
+    networks:
+      - sistema-ong-network
+    restart: "no"
+    command: |
+      sh -c "
+        apk add --no-cache tar gzip &&
+        while true; do
+          tar -czf /backup/output/sistema-ong-backup-$$(date +%Y%m%d_%H%M%S).tar.gz /backup/instance &&
+          find /backup/output -name '*.tar.gz' -mtime +7 -delete &&
+          sleep 86400
+        done
+      "
+
+volumes:
+  redis_data:
+    driver: local
+
+networks:
+  sistema-ong-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
