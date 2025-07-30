@@ -280,10 +280,11 @@ Este projeto está sob a licença MIT. Veja o arquivo `LICENSE` para mais detalh
 
 ## 👨‍💻 Autor
 
-**Ivanildo Nogueira Lima**
-- 📧 Email: [seu-email@exemplo.com]
-- 💼 LinkedIn: [seu-linkedin]
-- 🐱 GitHub: [seu-github]
+## 👤 Ivanildo Nogueira Lima
+
+📧 [Email](mailto:rodriguesivanildo@live.com)  
+💼 [LinkedIn](https://linkedin.com/in/ivanildo-nogueira-lima)  
+🐱 [GitHub](https://github.com/Ivaanildo)
 
 ## 🙏 Agradecimentos
 
