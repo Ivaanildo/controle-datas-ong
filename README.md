@@ -283,7 +283,7 @@ Este projeto está sob a licença MIT. Veja o arquivo `LICENSE` para mais detalh
 ## 👤 Ivanildo Nogueira Lima
 
 📧 [Email](mailto:rodriguesivanildo@live.com)  
-💼 [LinkedIn](https://linkedin.com/in/ivanildo-nogueira-lima)  
+💼 [LinkedIn](https://www.linkedin.com/in/ivanildo-nogueira-459550211/)  
 🐱 [GitHub](https://github.com/Ivaanildo)
 
 ## 🙏 Agradecimentos
